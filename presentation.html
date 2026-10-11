@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mobile Gaming &amp; In-App Purchase Behavior | DWM ISE1-A2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary: #0b0f19;
+      --bg-card: #131b2e;
+      --bg-glass: rgba(255, 255, 255, 0.03);
+      --border-glass: rgba(255, 255, 255, 0.08);
+      --border-subtle: rgba(255, 255, 255, 0.05);
+      --accent-blue: #3b82f6;
+      --accent-blue-light: #60a5fa;
+      --accent-blue-glow: rgba(59, 130, 246, 0.2);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.55);
+      --font-main: 'Inter', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html {
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ===== SLIDES ===== */
+    .deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: var(--bg-primary);
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      padding: 44px 60px 80px;
+      overflow-y: auto;
+      background: radial-gradient(1200px circle at 50% -10%, rgba(59, 130, 246, 0.12) 0%, #0b0f19 70%);
+      color: var(--text-primary);
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    /* Unified continuous background for all slides */
+    .slide-1,
+    .slide-2,
+    .slide-3,
+    .slide-4,
+    .slide-5,
+    .slide-6,
+    .slide-7,
+    .slide-8 {
+      background: radial-gradient(1200px circle at 50% -10%, rgba(59, 130, 246, 0.12) 0%, #0b0f19 70%);
+    }
+
+    /* ===== TYPOGRAPHY ===== */
+    .slide-number {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--accent-blue-light);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .slide-title {
+      font-size: 2.4rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #ffffff 40%, #60a5fa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .slide-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-bottom: 28px;
+      max-width: 700px;
+    }
+
+    h3 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent-blue-light);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+
+    /* ===== LAYOUT ===== */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.3s, transform 0.3s, border-color 0.3s;
+    }
+
+    .card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: rgba(96, 165, 250, 0.3);
+      transform: translateY(-1px);
+    }
+
+    .stat-card {
+      text-align: center;
+      padding: 18px 14px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 2.1rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 4px;
+      color: var(--accent-blue-light);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .blue,
+    .purple,
+    .pink,
+    .teal,
+    .orange,
+    .green,
+    .yellow {
+      color: var(--accent-blue-light);
+    }
+
+    .tag,
+    .tag.purple-tag,
+    .tag.pink-tag,
+    .tag.teal-tag,
+    .tag.orange-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #93c5fd;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    ul.bullet-list li {
+      position: relative;
+      padding-left: 18px;
+      margin-bottom: 9px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    ul.bullet-list li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--accent-blue-light);
+      font-weight: 700;
+    }
+
+    ul.bullet-list li strong {
+      color: var(--text-primary);
+    }
+
+    .chart-wrap {
+      position: relative;
+      width: 100%;
+      max-height: 240px;
+    }
+
+    .chart-wrap canvas {
+      max-height: 240px;
+    }
+
+    /* ===== TABLE ===== */
+    .bv-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 0.82rem;
+    }
+
+    .bv-table thead th {
+      background: rgba(59, 130, 246, 0.12);
+      color: #93c5fd;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 0.7rem;
+      padding: 11px 13px;
+      text-align: left;
+      border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .bv-table thead th:first-child {
+      border-radius: 10px 0 0 0;
+    }
+
+    .bv-table thead th:last-child {
+      border-radius: 0 10px 0 0;
+    }
+
+    .bv-table tbody td {
+      padding: 11px 13px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-secondary);
+      vertical-align: top;
+      line-height: 1.45;
+    }
+
+    .bv-table tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .bv-table tbody td:first-child {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .bv-table tbody td strong {
+      color: #f1f5f9;
+    }
+
+    /* ===== NAVIGATION ===== */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 48px;
+      background: rgba(11, 15, 25, 0.92);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-glass);
+      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-dots {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid #334155;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.3s;
+      padding: 0;
+    }
+
+    .nav-dot.active {
+      background: var(--accent-blue-light);
+      border-color: var(--accent-blue-light);
+      box-shadow: 0 0 10px rgba(96, 165, 250, 0.6);
+      transform: scale(1.3);
+    }
+
+    .nav-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      color: var(--text-primary);
+      padding: 8px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: var(--font-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.25s;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-btn:hover {
+      border-color: var(--accent-blue-light);
+      color: var(--accent-blue-light);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.25;
+      cursor: not-allowed;
+      border-color: var(--border-glass);
+      color: var(--text-muted);
+    }
+
+    .nav-info {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== TITLE SLIDE ===== */
+    .title-slide {
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .title-slide .slide-title {
+      font-size: 3.2rem;
+      max-width: 900px;
+      margin-bottom: 14px;
+    }
+
+    .title-slide .slide-subtitle {
+      font-size: 1.15rem;
+      max-width: 620px;
+      margin: 0 auto 28px;
+    }
+
+    .meta-line {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+
+    .meta-line strong {
+      color: var(--text-primary);
+    }
+
+    .icon-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .icon-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      font-size: 0.78rem;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* ===== QUESTION CARDS ===== */
+    .q-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+      transition: box-shadow 0.3s, transform 0.3s, border-color 0.3s;
+    }
+
+    .q-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: rgba(96, 165, 250, 0.3);
+      transform: translateX(4px);
+    }
+
+    .q-number {
+      flex-shrink: 0;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.95rem;
+      background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+      color: white;
+      box-shadow: 0 2px 10px rgba(37, 99, 235, 0.35);
+    }
+
+    .q-text {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      font-weight: 500;
+      line-height: 1.45;
+    }
+
+    .q-context {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* ===== FINDING CARDS ===== */
+    .finding-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 18px 20px;
+      border-left: 4px solid var(--accent-blue-light);
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .finding-card:hover {
+      transform: translateX(3px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .finding-card .finding-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .finding-card .finding-body {
+      font-size: 0.83rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .finding-card .finding-body strong {
+      color: #f1f5f9;
+    }
+
+    .finding-card:nth-child(n) {
+      border-left-color: var(--accent-blue-light);
+    }
+
+    /* ===== DASHBOARD MOCK ===== */
+    .dashboard-frame {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .dashboard-frame .db-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .looker-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: #93c5fa;
+      font-size: 0.76rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s;
+      margin-left: auto;
+    }
+
+    .looker-btn:hover {
+      background: var(--accent-blue);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(59, 130, 246, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .view-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .view-tab {
+      padding: 6px 16px;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border-glass);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .view-tab:hover {
+      color: var(--text-primary);
+      border-color: rgba(96, 165, 250, 0.3);
+    }
+
+    .view-tab.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--accent-blue-light);
+      color: #ffffff;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+    }
+
+    .db-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 13px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      font-size: 0.75rem;
+      color: #93c5fd;
+      font-weight: 600;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .filter-chip .x {
+      cursor: pointer;
+      opacity: 0.6;
+    }
+
+    .conclusion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .conclusion-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-glass);
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .conclusion-card h3 {
+      margin-bottom: 14px;
+    }
+
+    .conclusion-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .conclusion-card strong {
+      color: var(--text-primary);
+    }
+
+    .highlight-box {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin-top: 18px;
+    }
+
+    .highlight-box p {
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .key-hint {
+      position: fixed;
+      top: 14px;
+      right: 18px;
+      z-index: 100;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      opacity: 0.8;
+      background: var(--bg-card);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border-glass);
+    }
+
+    /* scrollbar */
+    .slide::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    .slide::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .slide::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="key-hint">← → or click to navigate</div>
+
+  <div class="deck" id="deck">
+
+    <!-- SLIDE 1 — Title / Organization & Problem -->
+    <div class="slide slide-1 title-slide active" data-index="0">
+      <div class="slide-number">Slide 01 / 08</div>
+      <h1 class="slide-title">Mobile Gaming &amp; In-App Purchase Behavior</h1>
+      <p class="slide-subtitle">Understanding player spending patterns, ad tolerance, and churn drivers among young
+        Indian gamers to unlock monetization strategies for mobile game publishers.</p>
+      <div style="margin-bottom: 14px;">
+        <span class="tag purple-tag">Domain: Mobile Gaming Industry</span>
+        <span class="tag">Data Warehousing &amp; Mining — ISE 1</span>
+      </div>
+      <p class="meta-line"><strong>By:</strong> Alister Pereira &amp; Nevan Nunes</p>
+      <p class="meta-line"><strong>Course:</strong> DWM (Sem 5) &nbsp;|&nbsp; October 2026</p>
+      <div class="icon-row">
+        <div class="icon-badge">🎮 77 Respondents</div>
+        <div class="icon-badge">📊 21 Attributes</div>
+        <div class="icon-badge">💰 Monetization Focus</div>
+      </div>
+      <div class="card" style="max-width: 720px; margin: 28px auto 0; text-align: left;">
+        <h3>Problem Statement</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+          The mobile gaming market in India is booming, yet <strong style="color: var(--text-primary);">most publishers
+            struggle with low conversion rates</strong> from free players to paying users. Only a small fraction of
+          players make in-app purchases, and <strong style="color: var(--text-primary);">excessive ads drive
+            churn</strong>. This study analyses survey data from 77 young gamers to identify spending triggers, ad
+          tolerance thresholds, and churn patterns — enabling data-driven decisions on pricing, ad placement, and
+          retention strategies.
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 — Dataset & Exploration -->
+    <div class="slide slide-2" data-index="1">
+      <div class="slide-number">Slide 02 / 08</div>
+      <h1 class="slide-title">Dataset &amp; Data Exploration</h1>
+      <p class="slide-subtitle">Primary data collected via Google Forms from October 5–7, 2026.</p>
+      <div class="grid-4" style="margin-bottom: 20px;">
+        <div class="card stat-card">
+          <div class="stat-value blue">77</div>
+          <div class="stat-label">Total Responses</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-value purple">21</div>
+          <div class="stat-label">Attributes</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-value teal">74</div>
+          <div class="stat-label">Active Gamers</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-value orange">3</div>
+          <div class="stat-label">Non-Gamers</div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Attribute Categories</h3>
+          <ul class="bullet-list">
+            <li><strong>Demographics (4):</strong> Gender, Age group, Year of study, Primary device</li>
+            <li><strong>Gaming Habits (5):</strong> Top game, Genre, Hours/week, Preferred time, Play style</li>
+            <li><strong>Monetization (5):</strong> Spent money?, Monthly spend, Items purchased, Purchase triggers,
+              Payment method</li>
+            <li><strong>Experience (4):</strong> Ad sentiment, Quit reasons, Satisfaction, Subscription willingness</li>
+            <li><strong>Meta (3):</strong> Timestamp, Data status, Play confirmation</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Data Quality Assessment</h3>
+          <ul class="bullet-list">
+            <li><strong>3 non-gamer responses</strong> skipped 16+ fields — handled via conditional branching</li>
+            <li><strong>7 partial responses</strong> missing ad sentiment, quit reasons, satisfaction &amp; subscription
+              columns</li>
+            <li><strong>Multi-select fields</strong> (purchases, triggers, quit reasons) stored as comma-separated
+              strings — require parsing</li>
+            <li><strong>No duplicate timestamps</strong> — each response is unique</li>
+            <li><strong>Gender skew:</strong> 89.6% Male vs 10.4% Female</li>
+          </ul>
+          <div style="margin-top: 10px;">
+            <span class="tag teal-tag">Primary Data</span>
+            <span class="tag orange-tag">Survey-based</span>
+            <span class="tag pink-tag">Cross-sectional</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 — Business Questions -->
+    <div class="slide slide-3" data-index="2">
+      <div class="slide-number">Slide 03 / 08</div>
+      <h1 class="slide-title">Business Questions</h1>
+      <p class="slide-subtitle">Five analytical questions that drive our exploration and inform actionable strategy.</p>
+      <div class="q-card">
+        <div class="q-number">1</div>
+        <div>
+          <div class="q-text">What are the primary spending patterns and how much do young gamers invest monthly in
+            in-app purchases?</div>
+          <div class="q-context">Maps revenue distribution across spend tiers to identify high-value segments.</div>
+        </div>
+      </div>
+      <div class="q-card">
+        <div class="q-number">2</div>
+        <div>
+          <div class="q-text">Which in-game items and purchase triggers drive the highest conversion from free-to-play
+            to paying users?</div>
+          <div class="q-context">Determines whether cosmetics, battle passes, or currency packs yield the best ROI for
+            publishers.</div>
+        </div>
+      </div>
+      <div class="q-card">
+        <div class="q-number">3</div>
+        <div>
+          <div class="q-text">How do ad experiences affect player retention, and at what threshold do ads trigger game
+            abandonment?</div>
+          <div class="q-context">Quantifies ad tolerance vs. churn to optimize ad frequency without losing players.
+          </div>
+        </div>
+      </div>
+      <div class="q-card">
+        <div class="q-number">4</div>
+        <div>
+          <div class="q-text">What is the viability of a premium subscription model (ad-free + perks) for this
+            demographic?</div>
+          <div class="q-context">Tests willingness-to-pay for subscription tiers as an alternative to ad-supported
+            revenue.</div>
+        </div>
+      </div>
+      <div class="q-card">
+        <div class="q-number">5</div>
+        <div>
+          <div class="q-text">What are the leading causes of player churn, and how can studios mitigate them to improve
+            lifetime value?</div>
+          <div class="q-context">Ranks churn drivers (ads, boredom, P2W, social loss) to prioritize retention
+            investments.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 — Data Visualization -->
+    <div class="slide slide-4" data-index="3">
+      <div class="slide-number">Slide 04 / 08</div>
+      <h1 class="slide-title">Data Visualization</h1>
+      <p class="slide-subtitle">Key charts derived from the survey data, with visual rationale for each.</p>
+      <div class="grid-2" style="margin-bottom: 20px;">
+        <div class="card">
+          <h3>Monthly Spend Distribution</h3>
+          <div class="chart-wrap"><canvas id="chartSpend"></canvas></div>
+          <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;"><strong>Rationale:</strong>
+            Horizontal bar chart shows the bimodal spending — gamers cluster at extremes (₹1-100 and ₹1000+).</p>
+        </div>
+        <div class="card">
+          <h3>Ad Sentiment Breakdown</h3>
+          <div class="chart-wrap"><canvas id="chartAds"></canvas></div>
+          <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;"><strong>Rationale:</strong> Doughnut
+            chart highlights that only 12% tolerate ads — the rest dislike, would pay to remove, or quit.</p>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-bottom: 20px;">
+        <div class="card">
+          <h3>Top Items Purchased</h3>
+          <div class="chart-wrap"><canvas id="chartItems"></canvas></div>
+          <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;"><strong>Rationale:</strong>
+            Skins/cosmetics dominate at 57 mentions — cosmetic monetization is the safest bet.</p>
+        </div>
+        <div class="card">
+          <h3>Quit Reasons (Top 6)</h3>
+          <div class="chart-wrap"><canvas id="chartQuit"></canvas></div>
+          <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;"><strong>Rationale:</strong> Radar
+            chart exposes the multi-dimensional nature of churn — ads and boredom co-dominate.</p>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Satisfaction Distribution</h3>
+          <div class="chart-wrap"><canvas id="chartSat"></canvas></div>
+          <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;"><strong>Rationale:</strong> Polar
+            area shows satisfaction skews positive (avg 4.15/5), but 18% rate ≤3.</p>
+        </div>
+        <div class="card">
+          <h3>Subscription Willingness</h3>
+          <div class="chart-wrap"><canvas id="chartSub"></canvas></div>
+          <p style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;"><strong>Rationale:</strong> "Maybe"
+            (47%) is the largest segment — a persuadable audience for subscription trials.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 — Interactive Dashboard -->
+    <div class="slide slide-5" data-index="4">
+      <div class="slide-number">Slide 05 / 08</div>
+      <h1 class="slide-title">Interactive Dashboard</h1>
+      <p class="slide-subtitle">Built in Google Looker Studio with real-time filters and cross-chart interactions.</p>
+      <div class="dashboard-frame">
+        <div class="db-header">
+          <div class="db-dot" style="background: #ef4444;"></div>
+          <div class="db-dot" style="background: #eab308;"></div>
+          <div class="db-dot" style="background: #22c55e;"></div>
+          <span style="font-size: 0.78rem; color: var(--text-muted); margin-left: 6px;">Google Looker Studio — Mobile Gaming &amp; In-App Purchase Dashboard</span>
+          <a href="https://datastudio.google.com/reporting/aaf44c3a-21c9-4960-9c11-78b64ad4ea34/page/q01AG" target="_blank" rel="noopener noreferrer" class="looker-btn">
+            🔗 Open Live Dashboard ↗
+          </a>
+        </div>
+
+        <div class="view-tabs">
+          <button class="view-tab active" id="tabLive" onclick="switchDashboardTab('live')">⚡ Live Looker Studio Embed</button>
+          <button class="view-tab" id="tabCharts" onclick="switchDashboardTab('charts')">📊 Chart Summary &amp; KPI View</button>
+        </div>
+
+        <!-- VIEW 1: LIVE LOOKER STUDIO EMBED -->
+        <div id="lookerEmbedView" style="width: 100%;">
+          <div style="position: relative; width: 100%; height: 500px; border-radius: 10px; overflow: hidden; background: #070a12; border: 1px solid rgba(255, 255, 255, 0.08);">
+            <iframe src="https://datastudio.google.com/embed/reporting/aaf44c3a-21c9-4960-9c11-78b64ad4ea34/page/q01AG"
+                    frameborder="0"
+                    style="width: 100%; height: 100%; border: 0;"
+                    allowfullscreen
+                    sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+            </iframe>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px; text-align: right;">
+            Direct Link: <a href="https://datastudio.google.com/reporting/aaf44c3a-21c9-4960-9c11-78b64ad4ea34/page/q01AG" target="_blank" style="color: var(--accent-blue-light); text-decoration: underline;">https://datastudio.google.com/reporting/aaf44c3a-21c9-4960-9c11-78b64ad4ea34/page/q01AG ↗</a>
+          </p>
+        </div>
+
+        <!-- VIEW 2: MOCKUP & CHARTS VIEW -->
+        <div id="lookerChartsView" style="display: none; width: 100%;">
+          <div style="margin-bottom: 14px;">
+            <h3>Interactive Filters &amp; Slicers</h3>
+            <div class="filter-chip">🔽 Gender <span class="x">✕</span></div>
+            <div class="filter-chip">🔽 Age Group <span class="x">✕</span></div>
+            <div class="filter-chip">🔽 Game Title <span class="x">✕</span></div>
+            <div class="filter-chip">🔽 Spent Money? <span class="x">✕</span></div>
+            <div class="filter-chip">🔽 Monthly Spend <span class="x">✕</span></div>
+          </div>
+          <div class="grid-3" style="margin-bottom: 14px;">
+            <div class="card stat-card" style="background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.2);">
+              <div class="stat-value blue">77</div>
+              <div class="stat-label">Total Responses</div>
+            </div>
+            <div class="card stat-card" style="background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.2);">
+              <div class="stat-value blue">4.15</div>
+              <div class="stat-label">Avg Satisfaction</div>
+            </div>
+            <div class="card stat-card" style="background: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.2);">
+              <div class="stat-value blue">60.8%</div>
+              <div class="stat-label">Spend Rate</div>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="padding: 14px;">
+              <h3 style="font-size: 0.75rem;">Top Games (Bar)</h3>
+              <div class="chart-wrap"><canvas id="chartDashGames"></canvas></div>
+            </div>
+            <div class="card" style="padding: 14px;">
+              <h3 style="font-size: 0.75rem;">Device Split (Doughnut)</h3>
+              <div class="chart-wrap"><canvas id="chartDashDevice"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top: 18px;">
+        <h3>How Filters Work</h3>
+        <ul class="bullet-list">
+          <li><strong>Cross-filtering:</strong> Clicking a bar in "Top Games" filters all other charts to show data only
+            for that game's players.</li>
+          <li><strong>Drop-down slicers:</strong> Gender, Age Group, and Spend Range allow segmented views — e.g.,
+            "Female, 20-21, ₹500+".</li>
+          <li><strong>Scorecard updates:</strong> KPIs (Total, Avg Satisfaction, Spend Rate) recalculate dynamically as
+            filters change.</li>
+          <li><strong>Date range control:</strong> Response timestamp filter enables viewing early vs. late survey
+            responses for bias checks.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 — Key Findings -->
+    <div class="slide slide-6" data-index="5">
+      <div class="slide-number">Slide 06 / 08</div>
+      <h1 class="slide-title">Key Findings</h1>
+      <p class="slide-subtitle">Five data-backed insights uncovered from the survey analysis.</p>
+      <div class="finding-card">
+        <div class="finding-title">1. Cosmetic Items Dominate Purchases</div>
+        <div class="finding-body"><strong>Skins &amp; cosmetics</strong> were selected by <strong>57 out of 74 gamers
+            (77%)</strong> as their primary purchase, far ahead of gems/currency (43%) and battle passes (38%).
+          Aesthetic appeal ("Looks / style") was the #1 purchase trigger cited by <strong>44 respondents (59%)</strong>.
+        </div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">2. Ads Are the #1 Churn Driver</div>
+        <div class="finding-body">"Too many ads" was cited by <strong>38 respondents (56%)</strong> as a reason for
+          quitting. <strong>20 players (29%)</strong> have already quit a game because of ads, and <strong>16
+            (24%)</strong> would pay to remove them. Only <strong>12% said they don't mind ads</strong>.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">3. Bimodal Spending — High Spenders Exist</div>
+        <div class="finding-body">Monthly spend follows a <strong>bimodal distribution</strong>: 31% spend ₹1-100
+          (micro-spenders) while <strong>34% spend ₹1000+</strong> (whales). This "barbell" pattern suggests different
+          monetization strategies for each segment.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">4. Subscription Model Has Untapped Potential</div>
+        <div class="finding-body">While only <strong>9% said "Yes"</strong> to a monthly subscription, a massive
+          <strong>47% said "Maybe"</strong>. This "persuadable majority" represents a conversion opportunity with the
+          right pricing and trial offers.</div>
+      </div>
+      <div class="finding-card">
+        <div class="finding-title">5. Social Play Drives Engagement &amp; Retention</div>
+        <div class="finding-body"><strong>34% play with friends/squad</strong> and <strong>32% play both solo and
+            squad</strong>. "Friends stopped playing" was the <strong>4th most cited quit reason (25%)</strong>. Social
+          features are critical retention levers.</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 — Business Value & Recommendations -->
+    <div class="slide slide-7" data-index="6">
+      <div class="slide-number">Slide 07 / 08</div>
+      <h1 class="slide-title">Business Value &amp; Recommendations</h1>
+      <p class="slide-subtitle">Translating data findings into actionable strategies and measurable business value.</p>
+      <div class="card" style="overflow-x: auto;">
+        <table class="bv-table">
+          <thead>
+            <tr>
+              <th style="width: 20%;">Data Finding</th>
+              <th style="width: 22%;">Business Problem</th>
+              <th style="width: 30%;">Recommended Action</th>
+              <th style="width: 28%;">Expected Business Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>77% buy skins/cosmetics; "Looks/style" is #1 trigger (59%)</td>
+              <td>Publishers invest in P2W items that frustrate 25 respondents and drive churn</td>
+              <td>Shift to <strong>cosmetic-only stores</strong>. Launch seasonal skin bundles tied to festivals/events
+                (3rd trigger at 36%).</td>
+              <td>↑ Player trust &amp; spend willingness. Reduced P2W complaints → ↓ churn. Higher ARPU from cosmetic
+                whales.</td>
+            </tr>
+            <tr>
+              <td>56% quit due to ads; only 12% don't mind them</td>
+              <td>Over-reliance on ad revenue causes player loss long-term</td>
+              <td>Implement <strong>smart ad capping</strong> (max 3 ads/session). Offer <strong>₹49/month ad-free
+                  trial</strong>. Use rewarded-only ads.</td>
+              <td>↓ 30-40% ad-driven churn. ↑ D30 retention. New subscription revenue stream.</td>
+            </tr>
+            <tr>
+              <td>47% said "Maybe" to subscriptions; 34% spend ₹1000+/month</td>
+              <td>No subscription offering exists; high-spenders have no loyalty tier</td>
+              <td>Launch <strong>3-tier subscription</strong>: Basic ₹49, Premium ₹149, Elite ₹299. Offer 7-day free
+                trial.</td>
+              <td>Predictable MRR. ↑ LTV of "Maybe" cohort. Whale retention via Elite exclusivity.</td>
+            </tr>
+            <tr>
+              <td>25% cited "Friends stopped playing" as quit reason</td>
+              <td>No social retention mechanisms; squad churn cascades</td>
+              <td>Build <strong>squad loyalty rewards</strong> and <strong>"Invite friend back"</strong> feature with
+                mutual rewards.</td>
+              <td>↑ Social stickiness → ↓ group churn. ↑ DAU via re-engagement. Word-of-mouth growth.</td>
+            </tr>
+            <tr>
+              <td>UPI dominates at 74% of payments</td>
+              <td>Payment friction may cause cart abandonment</td>
+              <td>Ensure <strong>frictionless UPI checkout</strong> (GPay/PhonePe SDK). Add <strong>micro-transaction
+                  bundles</strong> (₹10-50).</td>
+              <td>↑ Payment conversion. ↑ Revenue from 31% micro-spender segment.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 — Conclusion -->
+    <div class="slide slide-8" data-index="7">
+      <div class="slide-number">Slide 08 / 08</div>
+      <h1 class="slide-title">Conclusion</h1>
+      <p class="slide-subtitle">Summary of our analytical journey and the role of data analytics in mobile gaming.</p>
+      <div class="conclusion-grid">
+        <div class="conclusion-card">
+          <h3>Summary</h3>
+          <p>Our survey of <strong>77 young Indian gamers</strong> revealed: the audience is highly engaged (avg.
+            satisfaction 4.15/5), smartphone-based (75%), and willing to spend — <strong>60.8% made real-money
+              purchases</strong> in the last 3 months. However, <strong>ads are the #1 churn driver</strong>, and
+            retention depends on social dynamics and fair monetization.</p>
+        </div>
+        <div class="conclusion-card">
+          <h3>Analytics Contribution</h3>
+          <p>Data analytics transformed raw survey responses into <strong>5 actionable insights</strong> and <strong>5
+              business recommendations</strong>. By applying EDA, visualization, and BI dashboarding, we demonstrated:
+            <em>Data → Insight → Decision → Value</em>. The Looker Studio dashboard enables stakeholders to self-serve
+            filtered views.</p>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <h3>Key Takeaway</h3>
+        <p>Mobile game publishers should <strong>shift from ad-heavy to cosmetic-first monetization</strong>, introduce
+          <strong>tiered subscriptions</strong> targeting the 47% "Maybe" audience, and invest in <strong>social
+            retention features</strong>. Players <em>want</em> to spend — publishers just need to give them the right
+          reasons, not the wrong ads.</p>
+      </div>
+      <div class="grid-2" style="margin-top: 18px;">
+        <div class="card" style="text-align: center;">
+          <h3>Tools Used</h3>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 8px;">
+            <span class="tag">Google Forms</span>
+            <span class="tag purple-tag">Google Sheets</span>
+            <span class="tag teal-tag">Looker Studio</span>
+            <span class="tag pink-tag">Python (Pandas)</span>
+            <span class="tag orange-tag">Chart.js</span>
+          </div>
+        </div>
+        <div class="card" style="text-align: center;">
+          <h3>Thank You</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 8px;">
+            Alister Pereira &amp; Nevan Nunes<br />
+            <span style="color: var(--text-muted); font-size: 0.8rem;">DWM ISE 1 — Assignment 2</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav class="nav-bar">
+    <button class="nav-btn" id="prevBtn">← Previous</button>
+    <div class="nav-dots" id="navDots"></div>
+    <span class="nav-info" id="navInfo">1 / 8</span>
+    <button class="nav-btn" id="nextBtn">Next →</button>
+  </nav>
+
+  <script>
+    // ===== NAVIGATION =====
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let current = 0;
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const navInfo = document.getElementById('navInfo');
+    const navDots = document.getElementById('navDots');
+
+    // Build dots
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('button');
+      dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', function () { goToSlide(i); });
+      navDots.appendChild(dot);
+    }
+
+    function goToSlide(index) {
+      if (index < 0 || index >= totalSlides || index === current) return;
+
+      // Hide current
+      slides[current].classList.remove('active');
+      // Show new
+      current = index;
+      slides[current].classList.add('active');
+
+      // Update dots
+      const dots = navDots.querySelectorAll('.nav-dot');
+      dots.forEach(function (d, i) {
+        if (i === current) {
+          d.classList.add('active');
+        } else {
+          d.classList.remove('active');
+        }
+      });
+
+      // Update info and buttons
+      navInfo.textContent = (current + 1) + ' / ' + totalSlides;
+      prevBtn.disabled = current === 0;
+      nextBtn.disabled = current === totalSlides - 1;
+    }
+
+    prevBtn.addEventListener('click', function () { goToSlide(current - 1); });
+    nextBtn.addEventListener('click', function () { goToSlide(current + 1); });
+
+    // Keyboard
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        goToSlide(current + 1);
+      }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goToSlide(current - 1);
+      }
+    });
+
+    // Initial state
+    prevBtn.disabled = true;
+
+    // ===== CHARTS =====
+    // We must only init charts when their slide becomes visible, since canvas must be in the DOM
+    var chartsInitialized = {};
+
+    function initChartsForSlide(index) {
+      if (chartsInitialized[index]) return;
+      chartsInitialized[index] = true;
+
+      var lightFont = '#cbd5e1';
+      var mutedFont = '#64748b';
+      var gridColor = 'rgba(255, 255, 255, 0.08)';
+
+      if (index === 3) {
+        // Slide 4 — Data Visualization
+        new Chart(document.getElementById('chartSpend'), {
+          type: 'bar',
+          data: {
+            labels: ['₹1-100', '₹101-300', '₹301-500', '₹501-1000', '₹1000+'],
+            datasets: [{ data: [23, 2, 8, 16, 25], backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#2563eb', '#1d4ed8'], borderRadius: 6, borderSkipped: false }]
+          },
+          options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { x: { ticks: { color: mutedFont }, grid: { color: gridColor } }, y: { ticks: { color: lightFont, font: { size: 11 } }, grid: { display: false } } }
+          }
+        });
+
+        new Chart(document.getElementById('chartAds'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Dislike but tolerate', 'Quit because of ads', 'Would pay to remove', "Don't mind"],
+            datasets: [{ data: [24, 20, 16, 8], backgroundColor: ['#f59e0b', '#ef4444', '#3b82f6', '#10b981'], borderWidth: 2, borderColor: '#131b2e' }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '58%',
+            plugins: { legend: { position: 'right', labels: { color: lightFont, font: { size: 10 }, padding: 8 } } }
+          }
+        });
+
+        new Chart(document.getElementById('chartItems'), {
+          type: 'bar',
+          data: {
+            labels: ['Skins', 'Gems/Coins', 'Battle Pass', 'Characters', 'Loot Boxes', 'Ad Removal'],
+            datasets: [{ data: [57, 32, 28, 10, 8, 4], backgroundColor: 'rgba(59, 130, 246, 0.85)', borderRadius: 6, borderSkipped: false }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { ticks: { color: mutedFont }, grid: { color: gridColor } }, x: { ticks: { color: lightFont, font: { size: 10 } }, grid: { display: false } } }
+          }
+        });
+
+        new Chart(document.getElementById('chartQuit'), {
+          type: 'radar',
+          data: {
+            labels: ['Too many ads', 'Boring/repetitive', 'Pay-to-win', 'Friends left', 'Lack of time', 'Lag/bugs'],
+            datasets: [{ data: [38, 37, 25, 17, 17, 15], backgroundColor: 'rgba(59, 130, 246, 0.2)', borderColor: '#60a5fa', borderWidth: 2, pointBackgroundColor: '#93c5fd', pointRadius: 4 }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { r: { ticks: { color: mutedFont, backdropColor: 'transparent', font: { size: 9 } }, grid: { color: gridColor }, pointLabels: { color: lightFont, font: { size: 10 } }, angleLines: { color: gridColor } } }
+          }
+        });
+
+        new Chart(document.getElementById('chartSat'), {
+          type: 'polarArea',
+          data: {
+            labels: ['Rating 2', 'Rating 3', 'Rating 4', 'Rating 5'],
+            datasets: [{ data: [7, 5, 27, 29], backgroundColor: ['rgba(239, 68, 68, 0.7)', 'rgba(245, 158, 11, 0.7)', 'rgba(59, 130, 246, 0.7)', 'rgba(16, 185, 129, 0.7)'], borderWidth: 2, borderColor: '#131b2e' }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { color: lightFont, font: { size: 10 }, padding: 8 } } },
+            scales: { r: { ticks: { display: false }, grid: { color: gridColor } } }
+          }
+        });
+
+        new Chart(document.getElementById('chartSub'), {
+          type: 'pie',
+          data: {
+            labels: ['Maybe (47%)', 'No (44%)', 'Yes (9%)'],
+            datasets: [{ data: [32, 30, 6], backgroundColor: ['#3b82f6', '#64748b', '#10b981'], borderWidth: 2, borderColor: '#131b2e' }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { position: 'right', labels: { color: lightFont, font: { size: 11 }, padding: 10 } } }
+          }
+        });
+      }
+
+      if (index === 4) {
+        // Slide 5 — Dashboard
+        new Chart(document.getElementById('chartDashGames'), {
+          type: 'bar',
+          data: {
+            labels: ['MLBB', 'Other', 'Valorant', 'CoC/CR', 'Subway S.', 'FIFA', 'Free Fire'],
+            datasets: [{ data: [43, 8, 5, 4, 3, 3, 3], backgroundColor: ['#3b82f6', '#64748b', '#60a5fa', '#38bdf8', '#818cf8', '#2563eb', '#93c5fd'], borderRadius: 4, borderSkipped: false }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { ticks: { color: mutedFont, font: { size: 9 } }, grid: { color: gridColor } }, x: { ticks: { color: lightFont, font: { size: 9 } }, grid: { display: false } } }
+          }
+        });
+
+        new Chart(document.getElementById('chartDashDevice'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Smartphone (75%)', 'PC/Laptop (18%)', 'Console (7%)'],
+            datasets: [{ data: [58, 14, 5], backgroundColor: ['#3b82f6', '#60a5fa', '#38bdf8'], borderWidth: 2, borderColor: '#131b2e' }]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false, cutout: '55%',
+            plugins: { legend: { position: 'bottom', labels: { color: lightFont, font: { size: 10 }, padding: 8 } } }
+          }
+        });
+      }
+    }
+
+    // Observe slide changes to init charts lazily
+    var originalGoTo = goToSlide;
+    goToSlide = function (index) {
+      originalGoTo(index);
+      initChartsForSlide(index);
+    };
+
+    // Tab switcher for Dashboard Slide
+    function switchDashboardTab(tab) {
+      var liveTab = document.getElementById('tabLive');
+      var chartsTab = document.getElementById('tabCharts');
+      var liveView = document.getElementById('lookerEmbedView');
+      var chartsView = document.getElementById('lookerChartsView');
+
+      if (tab === 'live') {
+        liveTab.classList.add('active');
+        chartsTab.classList.remove('active');
+        liveView.style.display = 'block';
+        chartsView.style.display = 'none';
+      } else {
+        chartsTab.classList.add('active');
+        liveTab.classList.remove('active');
+        chartsView.style.display = 'block';
+        liveView.style.display = 'none';
+      }
+    }
+
+    // Init charts for the first slide if needed (title slide has no charts, but be safe)
+    initChartsForSlide(0);
+  </script>
+
+</body>
+
+</html>
